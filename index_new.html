@@ -1,0 +1,274 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Vision AI</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            padding: 30px 15px;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 14px;
+            box-shadow: 0 4px 18px #00000012;
+        }
+
+        h1 {
+            color: #2563eb;
+            margin-bottom: 8px;
+        }
+
+        input {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 13px;
+            margin: 12px 0;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        .section {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            overflow-wrap: anywhere;
+        }
+
+        #status {
+            margin-top: 15px;
+            white-space: pre-wrap;
+        }
+
+        li {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Local Vision AI</h1>
+        <p>Paste a webpage link and let your local AI analyze it.</p>
+
+    <div class="section">
+        <h2>Analyze a PDF</h2>
+        <p>Select a PDF document for your local AI to analyze.</p>
+
+       <form id="pdfForm">
+            <input
+                id="pdfFile"
+                type="file"
+                accept=".pdf,application/pdf"
+                required
+            >
+           <button id="pdfButton" type="submit">
+                Analyze PDF
+           </button>
+        </form>
+    </div>
+
+
+        <form id="analyzeForm">
+            <input
+                id="url"
+                type="url"
+                placeholder="https://example.com"
+                required
+            >
+            <button id="analyzeButton" type="submit">
+                Analyze Website
+            </button>
+        </form>
+
+        <p id="status" role="status"></p>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById("analyzeForm");
+        const urlInput = document.getElementById("url");
+        const button = document.getElementById("analyzeButton");
+        const status = document.getElementById("status");
+        const results = document.getElementById("results");
+
+        function addSection(title, content) {
+            const section = document.createElement("section");
+            section.className = "section";
+
+            const heading = document.createElement("h2");
+            heading.textContent = title;
+            section.appendChild(heading);
+
+            if (Array.isArray(content)) {
+                const list = document.createElement("ul");
+
+                content.forEach(item => {
+                    const li = document.createElement("li");
+                    li.textContent = String(item);
+                    list.appendChild(li);
+                });
+
+                section.appendChild(list);
+            } else {
+                const paragraph = document.createElement("p");
+                paragraph.textContent =
+                    typeof content === "object"
+                        ? JSON.stringify(content, null, 2)
+                        : String(content ?? "No information returned.");
+                section.appendChild(paragraph);
+            }
+
+            results.appendChild(section);
+        }
+
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            results.replaceChildren();
+            status.textContent = "Analyzing website... Please wait.";
+            button.disabled = true;
+
+            try {
+                const response = await fetch("/analyze-url", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        url: urlInput.value.trim()
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || "Analysis failed.");
+                }
+
+                let analysis = data.result;
+
+                if (typeof analysis === "string") {
+                    try {
+                        analysis = JSON.parse(analysis);
+                    } catch {
+                        // Display the original response if it isn't JSON.
+                    }
+                }
+
+                results.replaceChildren();
+
+                if (analysis && typeof analysis === "object" &&
+                    !Array.isArray(analysis)) {
+                    for (const [key, value] of Object.entries(analysis)) {
+                        const title = key
+                            .replaceAll("_", " ")
+                            .replace(/\b\w/g, letter => letter.toUpperCase());
+
+                        addSection(title, value);
+                    }
+                } else {
+                    addSection("AI Analysis", analysis);
+                }
+
+                status.textContent = "Analysis complete!";
+            } catch (error) {
+                status.textContent =
+                    "Error: " + error.message +
+                    "\nMake sure your Local Vision AI backend and Ollama are running.";
+            } finally {
+                button.disabled = false;
+            }
+        });
+
+document.getElementById("pdfForm").addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    const fileInput = document.getElementById("pdfFile");
+    const button = document.getElementById("pdfButton");
+
+    if (!fileInput.files.length) {
+        status.textContent = "Please select a PDF file.";
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+
+    results.replaceChildren();
+    status.textContent = "Analyzing PDF... Please wait.";
+    button.disabled = true;
+
+    try {
+        const response = await fetch("/analyze-pdf", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.detail || "PDF analysis failed.");
+        }
+
+        let analysis = data.result;
+
+        if (typeof analysis === "string") {
+            try {
+                analysis = JSON.parse(analysis);
+            } catch {
+                // Keep the original response if it isn't JSON.
+            }
+        }
+
+        if (analysis && typeof analysis === "object" &&
+            !Array.isArray(analysis)) {
+            for (const [key, value] of Object.entries(analysis)) {
+                const title = key
+                    .replaceAll("_", " ")
+                    .replace(/\b\w/g, letter => letter.toUpperCase());
+
+                addSection(title, value);
+            }
+        } else {
+            addSection("AI Analysis", analysis);
+        }
+
+        status.textContent = "PDF analysis complete!";
+    } catch (error) {
+        status.textContent = "Error: " + error.message;
+    } finally {
+        button.disabled = false;
+    }
+});
+
+    </script>
+</body>
+</html>

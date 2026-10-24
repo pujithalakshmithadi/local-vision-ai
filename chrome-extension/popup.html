@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Local Vision AI</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      width: 320px;
+      padding: 15px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      cursor: pointer;
+    }
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      margin-top: 8px;
+      padding: 8px;
+    }
+    #status, #result {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+  </style>
+</head>
+<body>
+  <h3>Local Vision AI</h3>
+
+  <button id="readPage">Read This Page</button>
+  <p id="status">Ready</p>
+  <div id="result"></div>
+
+  <textarea id="question" rows="3"
+    placeholder="Ask something about this page..."></textarea>
+  <button id="sendAI">Analyze Webpage</button>
+  <button id="askAI">Ask AI</button>
+  <button id="makePPT">Generate & Download PPTX</button>
+
+  <script src="popup.js"></script>
+</body>
+</html>

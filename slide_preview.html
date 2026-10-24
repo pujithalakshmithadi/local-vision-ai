@@ -1,0 +1,496 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local Vision AI - PPT Generator</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      color: #172033;
+      background: #f1f5f9;
+    }
+
+    header {
+      padding: 24px 16px;
+      color: white;
+      text-align: center;
+      background: #172554;
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+    }
+
+    header p {
+      margin: 0;
+      color: #dbeafe;
+    }
+
+    main {
+      width: min(900px, 94%);
+      margin: 28px auto;
+    }
+
+    .panel {
+      padding: 22px;
+      margin-bottom: 22px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px #0000000d;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 150px;
+      padding: 12px;
+      font: inherit;
+      line-height: 1.5;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      resize: vertical;
+    }
+
+    button {
+      padding: 12px 16px;
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+      background: #2563eb;
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover:not(:disabled) {
+      filter: brightness(0.92);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .full-width {
+      width: 100%;
+      margin-top: 12px;
+    }
+
+    #generateBtn {
+      background: #0f766e;
+    }
+
+    #downloadBtn {
+      background: #2563eb;
+    }
+
+    #status {
+      min-height: 22px;
+      margin-top: 14px;
+      overflow-wrap: anywhere;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .hint {
+      color: #64748b;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .presentation-heading {
+      margin: 0 0 20px;
+      color: #172554;
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+
+    .slide {
+      display: flex;
+      flex-direction: column;
+      min-height: 350px;
+      padding: 30px;
+      background: #fff;
+      border: 1px solid #dbeafe;
+      border-top: 7px solid #2563eb;
+      border-radius: 8px;
+    }
+
+    .slide-label {
+      color: #2563eb;
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+    }
+
+    #slideTitle {
+      margin: 18px 0;
+      color: #172554;
+      font-size: 28px;
+      overflow-wrap: anywhere;
+    }
+
+    #bulletList {
+      padding-left: 24px;
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.7;
+    }
+
+    #bulletList li {
+      margin-bottom: 10px;
+      overflow-wrap: anywhere;
+    }
+
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: auto;
+      padding-top: 25px;
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    .navigation {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    #counter {
+      color: #475569;
+      font-size: 14px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .notes {
+      padding: 15px;
+      margin-top: 18px;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+
+    .notes h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+
+    #speakerNotes {
+      color: #475569;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 600px) {
+      .slide {
+        min-height: 300px;
+        padding: 20px;
+      }
+
+      #slideTitle {
+        font-size: 23px;
+      }
+
+      #bulletList {
+        font-size: 16px;
+      }
+
+      .navigation button {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Local Vision AI</h1>
+    <p>Analyze webpage text and generate an editable PowerPoint</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <label for="pageText">Webpage text</label>
+
+      <textarea id="pageText">Solar energy comes from sunlight. Solar panels convert sunlight into electricity. Solar energy is renewable and can reduce dependence on fossil fuels. Solar electricity production depends on sunlight, weather, and panel efficiency. Solar power can be used in homes, schools, and businesses.</textarea>
+
+      <button type="button" id="generateBtn" class="full-width">
+        ✨ Generate PPT Slides
+      </button>
+
+      <button type="button" id="downloadBtn" class="full-width" disabled>
+        ⬇ Download PPTX
+      </button>
+
+      <div id="status" role="status" aria-live="polite">
+        Ready. Enter text and click Generate PPT Slides.
+      </div>
+
+      <p class="hint">
+        Demo mode: sample solar-energy text is provided. Replace it with
+        text copied from your webpage. The Chrome extension can supply
+        webpage text automatically after integration.
+      </p>
+    </section>
+
+    <section class="panel">
+      <h2 class="presentation-heading" id="presentationTitle">
+        Your AI Presentation
+      </h2>
+
+      <div class="slide">
+        <div class="slide-label">LOCAL VISION AI</div>
+
+        <h2 id="slideTitle">Your slides will appear here</h2>
+
+        <ul id="bulletList">
+          <li>Enter webpage text above.</li>
+          <li>Click Generate PPT Slides.</li>
+          <li>Preview your generated slides.</li>
+        </ul>
+
+        <div class="slide-footer">
+          <span>Generated with Local Vision AI</span>
+          <span id="slideNumber">—</span>
+        </div>
+      </div>
+
+      <div class="navigation">
+        <button type="button" id="prevBtn" disabled>
+          ← Previous
+        </button>
+
+        <span id="counter">No slides generated</span>
+
+        <button type="button" id="nextBtn" disabled>
+          Next →
+        </button>
+      </div>
+
+      <div class="notes">
+        <h3>Speaker Notes</h3>
+        <div id="speakerNotes">
+          Speaker notes will appear here after generation.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const API_URL = "http://127.0.0.1:8000";
+
+    let presentation = {
+      presentation_title: "",
+      slides: []
+    };
+
+    let currentSlide = 0;
+
+    const pageText = document.getElementById("pageText");
+    const generateBtn = document.getElementById("generateBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const status = document.getElementById("status");
+
+    const presentationTitle =
+      document.getElementById("presentationTitle");
+    const slideTitle = document.getElementById("slideTitle");
+    const bulletList = document.getElementById("bulletList");
+    const counter = document.getElementById("counter");
+    const slideNumber = document.getElementById("slideNumber");
+    const speakerNotes = document.getElementById("speakerNotes");
+
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    function renderSlide() {
+      const slide = presentation.slides[currentSlide];
+
+      if (!slide) {
+        return;
+      }
+
+      presentationTitle.textContent =
+        presentation.presentation_title || "AI Presentation";
+
+      slideTitle.textContent = slide.title || "Untitled Slide";
+
+      bulletList.replaceChildren();
+
+      const bullets = Array.isArray(slide.bullets)
+        ? slide.bullets
+        : [];
+
+      bullets.forEach((bullet) => {
+        const li = document.createElement("li");
+        li.textContent = String(bullet);
+        bulletList.appendChild(li);
+      });
+
+      counter.textContent =
+        `Slide ${currentSlide + 1} of ${presentation.slides.length}`;
+
+      slideNumber.textContent =
+        String(currentSlide + 1).padStart(2, "0");
+
+      speakerNotes.textContent =
+        slide.speaker_notes || "No speaker notes available.";
+
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.disabled =
+        currentSlide >= presentation.slides.length - 1;
+    }
+
+    generateBtn.addEventListener("click", async () => {
+      const text = pageText.value.trim();
+
+      if (!text) {
+        status.textContent = "Please enter webpage text first.";
+        pageText.focus();
+        return;
+      }
+
+      generateBtn.disabled = true;
+      downloadBtn.disabled = true;
+      status.textContent = "AI is generating slides. Please wait...";
+
+      try {
+        const response = await fetch(`${API_URL}/generate-slides`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ text })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.detail || `Server error: ${response.status}`
+          );
+        }
+
+        if (!Array.isArray(data.slides) || data.slides.length === 0) {
+          throw new Error("The AI did not return any slides.");
+        }
+
+        presentation = data;
+        currentSlide = 0;
+
+        renderSlide();
+        downloadBtn.disabled = false;
+
+        status.textContent =
+          `Success! ${presentation.slides.length} slides generated.`;
+
+      } catch (error) {
+        console.error(error);
+        status.textContent =
+          "Slide generation failed: " + error.message;
+
+      } finally {
+        generateBtn.disabled = false;
+      }
+    });
+
+    prevBtn.addEventListener("click", () => {
+      if (currentSlide > 0) {
+        currentSlide--;
+        renderSlide();
+      }
+    });
+
+    nextBtn.addEventListener("click", () => {
+      if (currentSlide < presentation.slides.length - 1) {
+        currentSlide++;
+        renderSlide();
+      }
+    });
+
+    downloadBtn.addEventListener("click", async () => {
+      if (!presentation.slides.length) {
+        status.textContent = "Generate slides first.";
+        return;
+      }
+
+      downloadBtn.disabled = true;
+      status.textContent = "Creating your PowerPoint file...";
+
+      let objectUrl = null;
+
+      try {
+        const response = await fetch(`${API_URL}/create-pptx`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(presentation)
+        });
+
+        if (!response.ok) {
+          let message = `Server error: ${response.status}`;
+
+          try {
+            const errorData = await response.json();
+            message = errorData.detail || message;
+          } catch (_) {
+            // Keep the default error message.
+          }
+
+          throw new Error(message);
+        }
+
+        const blob = await response.blob();
+
+        if (blob.size === 0) {
+          throw new Error("The downloaded PowerPoint file is empty.");
+        }
+
+        objectUrl = URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = objectUrl;
+        link.download = "local_vision_ai_presentation.pptx";
+
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        status.textContent =
+          "PowerPoint download started successfully!";
+
+      } catch (error) {
+        console.error(error);
+        status.textContent =
+          "Download failed: " + error.message;
+
+      } finally {
+        if (objectUrl) {
+          setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+        }
+
+        downloadBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
