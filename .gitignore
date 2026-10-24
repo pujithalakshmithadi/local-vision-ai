@@ -1,0 +1,7 @@
+node_modules/
+__pycache__/
+.env
+.env.local
+main_backup.py
+solar_energy_demo.pptx
+slide_preview.html
